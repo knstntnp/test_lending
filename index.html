@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Розыгрыш автомобиля - Определение победителя</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #c0c0c0;
+            font-weight: 300;
+        }
+
+        .winner-section {
+            background: linear-gradient(145deg, #1e3a5f, #2a4a6f);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 60px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .winner-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .winner-display {
+            position: relative;
+            z-index: 1;
+        }
+
+        .winner-label {
+            font-size: 1.8rem;
+            color: #c0c0c0;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .winner-name {
+            font-size: 4rem;
+            color: #ffd700;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .winner-name.animate {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .draw-button {
+            background: linear-gradient(145deg, #ffd700, #ffaa00);
+            color: #1a1a2e;
+            border: none;
+            padding: 25px 80px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 40px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .draw-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .draw-button:active {
+            transform: translateY(0);
+        }
+
+        .participants-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .participants-title {
+            font-size: 2.5rem;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .participants-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .participants-table thead {
+            background: linear-gradient(145deg, #2a4a6f, #1e3a5f);
+        }
+
+        .participants-table th {
+            padding: 20px;
+            text-align: left;
+            font-size: 1.1rem;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .participants-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1rem;
+            color: #e0e0e0;
+        }
+
+        .participants-table tbody tr:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .participants-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #ffd700;
+            animation: fall linear forwards;
+            z-index: 1000;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            color: #808080;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .winner-name {
+                font-size: 2.5rem;
+            }
+
+            .draw-button {
+                padding: 20px 40px;
+                font-size: 1.3rem;
+            }
+
+            .participants-table {
+                font-size: 0.9rem;
+            }
+
+            .participants-table th,
+            .participants-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Розыгрыш Автомобиля 🏆</h1>
+            <p class="subtitle">Официальная церемония определения победителя</p>
+        </header>
+
+        <section class="winner-section">
+            <div class="winner-display">
+                <div class="winner-label">Победитель розыгрыша:</div>
+                <div class="winner-name" id="winnerName">Нажмите кнопку ниже</div>
+                <button class="draw-button" id="drawButton" onclick="drawWinner()">
+                    Определить Победителя
+                </button>
+            </div>
+        </section>
+
+        <section class="participants-section">
+            <h2 class="participants-title">Список Участников</h2>
+            <table class="participants-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Имя</th>
+                        <th>Фамилия</th>
+                    </tr>
+                </thead>
+                <tbody id="participantsTableBody">
+                </tbody>
+            </table>
+        </section>
+
+        <footer>
+            <p>© 2024 Официальный розыгрыш. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script>
+        let participants = [];
+
+        // Загрузка данных из CSV
+        async function loadParticipants() {
+            try {
+                const response = await fetch('participants.csv');
+                const csvText = await response.text();
+                
+                const lines = csvText.trim().split('\n');
+                const headers = lines[0].split(',');
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',');
+                    if (values.length >= 2) {
+                        participants.push({
+                            firstName: values[0].trim(),
+                            lastName: values[1].trim(),
+                            patronymic: values[2] ? values[2].trim() : '',
+                            phone: values[3] ? values[3].trim() : ''
+                        });
+                    }
+                }
+                
+                renderParticipantsTable();
+            } catch (error) {
+                console.error('Ошибка загрузки CSV:', error);
+                document.getElementById('winnerName').textContent = 'Ошибка загрузки данных';
+            }
+        }
+
+        // Отображение таблицы участников
+        function renderParticipantsTable() {
+            const tbody = document.getElementById('participantsTableBody');
+            tbody.innerHTML = '';
+            
+            participants.forEach((participant, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${participant.firstName}</td>
+                    <td>${participant.lastName}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Определение победителя
+        function drawWinner() {
+            if (participants.length === 0) {
+                alert('Список участников пуст!');
+                return;
+            }
+
+            const button = document.getElementById('drawButton');
+            const winnerNameElement = document.getElementById('winnerName');
+            
+            // Блокируем кнопку на время анимации
+            button.disabled = true;
+            button.textContent = 'Выбираем...';
+            
+            // Анимация перебора имен
+            let counter = 0;
+            const maxCounter = 20;
+            const interval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * participants.length);
+                const participant = participants[randomIndex];
+                winnerNameElement.textContent = `${participant.lastName} ${participant.firstName}`;
+                winnerNameElement.classList.add('animate');
+                
+                counter++;
+                if (counter >= maxCounter) {
+                    clearInterval(interval);
+                    
+                    // Финальный выбор победителя
+                    const winnerIndex = Math.floor(Math.random() * participants.length);
+                    const winner = participants[winnerIndex];
+                    winnerNameElement.textContent = `${winner.lastName} ${winner.firstName}`;
+                    
+                    // Эффект конфетти
+                    createConfetti();
+                    
+                    // Разблокируем кнопку
+                    button.disabled = false;
+                    button.textContent = 'Определить Победителя';
+                    
+                    setTimeout(() => {
+                        winnerNameElement.classList.remove('animate');
+                    }, 500);
+                }
+            }, 100);
+        }
+
+        // Создание конфетти
+        function createConfetti() {
+            const colors = ['#ffd700', '#ffaa00', '#ffffff', '#c0c0c0'];
+            
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }, i * 30);
+            }
+        }
+
+        // Загрузка данных при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadParticipants);
+    </script>
+</body>
+</html>
