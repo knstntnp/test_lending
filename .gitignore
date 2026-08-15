@@ -1,1 +1,0 @@
-Nothing should be ignored in this case, as the changes only include source/config files (HTML and CSV) without any build artifacts, dependencies, or temporary files.
